@@ -1,0 +1,50 @@
+<html ng-app="uploadTest">
+   <head>
+      <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+   </head>
+   <body>
+      <div ng-controller="uploadCtrl">
+         <input type="file" file-model="myFile"/>
+         <button ng-click="uploadFile()">upload me</button>
+      </div>
+      
+      <script>
+         var myApp = angular.module('uploadTest', []);
+         
+         myApp.directive('fileModel', ['$parse', function ($parse) {
+            return {
+               restrict: 'A',
+               link: function(scope, element, attrs) {
+                  var model = $parse(attrs.fileModel);
+                  var modelSetter = model.assign;
+                  
+                  element.bind('change', function(){
+                     scope.$apply(function(){
+                        modelSetter(scope, element[0].files[0]);
+                     });
+                  });
+               }
+            };
+         }]);
+      
+         myApp.controller('uploadCtrl', ['$scope','$http', function($scope, $http){
+            $scope.uploadFile = function(){
+               var file = $scope.myFile;
+               var fd = new FormData();
+               fd.append('file', file);
+            
+               $http.post("http://127.0.0.1:1337/fileUpload/uploadFile", fd, {
+                  transformRequest: angular.identity,
+                  headers: {'Content-Type': undefined}
+               }).success(function(res){
+                  console.log(res);
+               }).error(function(){
+
+               });
+            };
+         }]);
+			
+      </script>
+      
+   </body>
+</html>
